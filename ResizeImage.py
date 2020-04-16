@@ -2,6 +2,7 @@ import cv2
 import sys
 import os
 import json
+from PIL import Image
 #pip3 install opencv-python
 #python3 ResizeImage.py img.png
 
@@ -26,15 +27,21 @@ dimArr = [[(20, 20), 2, 'iphone'],
           [(83.5, 83.5), 2, 'ipad'],
           [(1024, 1024), 1, 'ios-marketing']
           ]
+def addProfile(image, icc_profile):
+    im = Image.open(image)
+    im.save(image, "png", icc_profile=icc_profile)
+    print('icc_profile', icc_profile)
 def make_app_icon(img_path):
     cwd = os.getcwd()
     iconDir = cwd + '/AppIcon.appiconset'
     if not os.path.exists(iconDir):
         os.mkdir(iconDir)
         print('iconDir', iconDir)
-
+    # addProfile(img_path)
     print('cwd', cwd)
     img = cv2.imread(img_path, cv2.IMREAD_UNCHANGED)
+    im = Image.open(img_path)
+    icc_profile = im.info.get("icc_profile")
     print('Original Dimensions : ', img.shape)
     jsonContent = {}
     images = []
@@ -51,6 +58,7 @@ def make_app_icon(img_path):
         imgObj['scale'] = scale
         imgObj['filename'] = filename
         status = cv2.imwrite(iconDir + '/' + filename, resized)
+        addProfile(iconDir + '/' + filename, icc_profile)
         print('Resized Dimensions : ', resized.shape)
         print('filename', filename)
         images.append(imgObj)
